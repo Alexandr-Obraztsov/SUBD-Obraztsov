@@ -1,0 +1,19 @@
+services:
+  sql1:
+    build: ../lab1
+    container_name: lab2_sql1
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./volumes/sql1/tempdb:/var/opt/mssql/tempdb
+      - ./volumes/sql1/additionaldata:/var/opt/mssql/additionaldata
+    networks:
+      - lab2_net
+
+networks:
+  lab2_net:
+    driver: bridge
