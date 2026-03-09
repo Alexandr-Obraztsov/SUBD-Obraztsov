@@ -1,0 +1,39 @@
+services:
+  sql1:
+    build: ../lab1
+    container_name: lab4_sql1
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      # Образ SQL Server ожидает SA_PASSWORD; берём из MSSQL_SA_PASSWORD или SA_PASSWORD
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+    ports:
+      - "1441:1433"
+    volumes:
+      - ./volumes/sql1/tempdb:/var/opt/mssql/tempdb
+      - ./volumes/sql1/additionaldata:/var/opt/mssql/additionaldata
+      # Общий том для резервных копий, примонтированный к обоим контейнерам
+      - ./volumes/shared/backup:/var/opt/mssql/backup
+    networks:
+      - lab4_net
+
+  sql2:
+    build: ../lab1
+    container_name: lab4_sql2
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+    ports:
+      - "1442:1433"
+    volumes:
+      - ./volumes/shared/backup:/var/opt/mssql/backup
+    networks:
+      - lab4_net
+
+networks:
+  lab4_net:
+    driver: bridge
+

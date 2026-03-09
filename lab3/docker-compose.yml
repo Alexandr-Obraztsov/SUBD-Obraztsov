@@ -1,0 +1,43 @@
+# Лабораторная №3: два экземпляра SQL Server для TDE и переноса
+# macOS: Extended Events, Server Audit, роли, TDE, восстановление на sql2
+# Скопируйте .env.example в .env и задайте MSSQL_SA_PASSWORD
+
+services:
+  sql1:
+    build: ../lab1
+    container_name: lab3_sql1
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      # Образ SQL Server Linux ожидает SA_PASSWORD; дублируем из MSSQL_SA_PASSWORD при необходимости
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./volumes/sql1/tempdb:/var/opt/mssql/tempdb
+      - ./volumes/sql1/additionaldata:/var/opt/mssql/additionaldata
+      - ./volumes/sql1/xel:/var/opt/mssql/xel
+      - ./volumes/sql1/audit:/var/opt/mssql/audit
+      - ./volumes/backup:/var/opt/mssql/backup
+    networks:
+      - lab3_net
+
+  sql2:
+    build: ../lab1
+    container_name: lab3_sql2
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+    ports:
+      - "1434:1433"
+    volumes:
+      - ./volumes/backup:/var/opt/mssql/backup
+    networks:
+      - lab3_net
+
+networks:
+  lab3_net:
+    driver: bridge

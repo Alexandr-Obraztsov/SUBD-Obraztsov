@@ -1,0 +1,64 @@
+services:
+  sql1:
+    build: ../lab1
+    container_name: lab5_sql1
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      # Пароль SA берём из MSSQL_SA_PASSWORD или SA_PASSWORD
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+      # Для log shipping и replication нужен SQL Server Agent
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1451:1433"
+    volumes:
+      # Общий том для бэкапов (log shipping) и снимков репликации
+      - ./volumes/shared/backup:/var/opt/mssql/backup
+      - ./volumes/shared/replication:/var/opt/mssql/replication
+      # Скрипты lab5 и lab2 внутри контейнера
+      - ./sql:/lab5/sql
+      - ../lab2/sql:/lab2/sql
+    networks:
+      - lab5_net
+
+  sql2:
+    build: ../lab1
+    container_name: lab5_sql2
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1452:1433"
+    volumes:
+      - ./volumes/shared/backup:/var/opt/mssql/backup
+      - ./volumes/shared/replication:/var/opt/mssql/replication
+      - ./sql:/lab5/sql
+    networks:
+      - lab5_net
+
+  sql3:
+    build: ../lab1
+    container_name: lab5_sql3
+    env_file: .env
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-${SA_PASSWORD}}
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1453:1433"
+    volumes:
+      - ./volumes/shared/backup:/var/opt/mssql/backup
+      - ./volumes/shared/replication:/var/opt/mssql/replication
+      - ./sql:/lab5/sql
+    networks:
+      - lab5_net
+
+networks:
+  lab5_net:
+    driver: bridge
+
